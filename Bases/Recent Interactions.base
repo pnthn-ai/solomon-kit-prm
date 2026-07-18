@@ -1,0 +1,15 @@
+# Solomon PRM kit — the 20 most recently touched interaction notes.
+filters:
+  and:
+    - type == "interaction"
+views:
+  - type: table
+    name: Recent Interactions
+    order:
+      - person
+      - mode
+      - resonance
+    sort:
+      - property: file.mtime
+        direction: DESC
+    limit: 20

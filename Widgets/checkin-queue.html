@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<!-- Solomon PRM kit widget: a table of who you're overdue to contact, fed
+     by the base DSL. Cloned from src-tauri/src/widgets_starters/base-table.html
+     (M14 D8/D9 pattern) — same protocol, just pre-seeded with the PRM kit's
+     Overdue.base predicate as the placeholder. The manifest's "data": "base"
+     makes the HOST treat the embedding fence's body as a base query, run it
+     vault-side, and push rows over solomon:widget:data — this iframe stays
+     null-origin sandboxed and never touches the vault directly. Embed with:
+       ```solomon-widget {"id":"checkin-queue"}
+       from notes
+       where type is person
+       where last_contact lt now-30d
+       sort last_contact asc
+       columns circle, last_contact, cadence_days
+       ```
+-->
+<script type="application/json" id="solomon-widget">
+{
+  "name": "Check-in queue",
+  "dsl": "base",
+  "data": "base",
+  "description": "Who you're overdue to contact, oldest last_contact first. The widget source IS the query — edit it like any fence.",
+  "placeholder": "from notes\nwhere type is person\nwhere last_contact lt now-30d\nsort last_contact asc\ncolumns circle, last_contact, cadence_days"
+}
+</script>
+<style id="solomon-widget-style">
+  :root {
+    color-scheme: dark;
+    --sol-bg: transparent;
+    --sol-fg: #dcdcdc;
+    --sol-muted: #8a8a8a;
+    --sol-dim: #5f5f5f;
+    --sol-accent: #b08968;
+    --sol-line: #2a2a2a;
+    --sol-danger: #c26d5c;
+  }
+  html, body { margin: 0; padding: 0; background: var(--sol-bg); }
+  body {
+    font-family: "Inter", -apple-system, system-ui, sans-serif;
+    color: var(--sol-fg); font-size: 13px; padding: 4px 2px;
+  }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 5px 10px; border-bottom: 1px solid var(--sol-line); }
+  th { color: var(--sol-muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+  tr:last-child td { border-bottom: none; }
+  td.title { color: var(--sol-fg); }
+  td.meta { color: var(--sol-muted); }
+  td.mod { color: var(--sol-dim); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .empty, .pending { color: var(--sol-dim); font-style: italic; padding: 4px 2px; }
+  .error {
+    color: var(--sol-danger); font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px; white-space: pre-wrap; padding: 4px 2px;
+  }
+  .count { color: var(--sol-dim); font-size: 10.5px; padding: 4px 2px 0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script id="solomon-widget-protocol">
+  // ── shared widget protocol (keep in lockstep with widget-protocol.js) ──
+  // DATA is host→iframe: { rows, columns, view, error } base_query results,
+  // re-served on every re-READY and never deduped (same query, fresh rows).
+  var M = {
+    READY: 'solomon:widget:ready',
+    RENDER: 'solomon:widget:render',
+    RENDERED: 'solomon:widget:rendered',
+    DATA: 'solomon:widget:data',
+    ERROR: 'solomon:widget:error'
+  };
+  var root = document.getElementById('root');
+  function done() {
+    parent.postMessage({ type: M.RENDERED, height: document.documentElement.scrollHeight }, '*');
+  }
+  function fail(e) {
+    parent.postMessage({ type: M.ERROR, message: String((e && e.message) || e) }, '*');
+  }
+  window.addEventListener('message', function (ev) {
+    var d = ev.data;
+    if (d && d.type === M.RENDER) render(d.source || '');
+    if (d && d.type === M.DATA) renderData(d);
+  });
+  parent.postMessage({ type: M.READY }, '*');
+</script>
+<script id="solomon-widget-main">
+  // RENDER always fires first (the query text); DATA follows with the rows.
+  // Until rows arrive this renders a pending strip so the frame is never
+  // blank, and every state posts RENDERED so the host can size it.
+  var lastData = null;
+
+  function render(source) {
+    try {
+      if (lastData) { renderData(lastData); return; }
+      root.innerHTML = '<div class="pending">Running check-in query…</div>';
+      done();
+    } catch (e) { fail(e); }
+  }
+
+  function renderData(data) {
+    try {
+      lastData = data;
+      if (data.error) {
+        var where = data.error.line != null ? 'line ' + data.error.line + ': ' : '';
+        root.innerHTML = '<div class="error">' + esc(where + (data.error.message || 'query failed')) + '</div>';
+        return done();
+      }
+      var rows = data.rows || [];
+      if (!rows.length) {
+        root.innerHTML = '<div class="empty">Nobody is overdue — you\'re all caught up.</div>';
+        return done();
+      }
+      var cols = data.columns || [];
+      var html = '<table><thead><tr><th>Who</th>';
+      for (var i = 0; i < cols.length; i++) html += '<th>' + esc(cols[i]) + '</th>';
+      html += '<th>Modified</th></tr></thead><tbody>';
+      for (var r = 0; r < rows.length; r++) {
+        var n = rows[r];
+        html += '<tr><td class="title">' + esc(n.title || n.rel_path || '') + '</td>';
+        for (var c = 0; c < cols.length; c++) {
+          html += '<td class="meta">' + esc(cell(field(n, cols[c]))) + '</td>';
+        }
+        html += '<td class="mod">' + esc(when(n.modified_ms)) + '</td></tr>';
+      }
+      html += '</tbody></table>';
+      html += '<div class="count">' + rows.length + ' overdue' + '</div>';
+      root.innerHTML = html;
+      done();
+    } catch (e) { fail(e); }
+  }
+
+  function cell(v) {
+    if (v == null) return '';
+    if (Array.isArray(v)) return v.map(cell).join(', ');
+    if (typeof v === 'object') return JSON.stringify(v);
+    return String(v);
+  }
+  // Meta fields (__title/__path/__modified) ride the row's top-level
+  // properties, not frontmatter — same mapping as the engine's read_field.
+  function field(n, k) {
+    if (k === '__title') return n.title;
+    if (k === '__path') return n.rel_path;
+    if (k === '__modified') return when(n.modified_ms);
+    return (n.frontmatter || {})[k];
+  }
+  function when(ms) {
+    if (!ms) return '';
+    try { return new Date(ms).toLocaleDateString(); } catch (e) { return ''; }
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+</script>
+</body>
+</html>

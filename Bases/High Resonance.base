@@ -1,0 +1,15 @@
+# Solomon PRM kit — engagements that landed (resonance 4-5), across modes.
+filters:
+  and:
+    - type == "interaction"
+    - resonance >= 4
+views:
+  - type: table
+    name: High Resonance
+    order:
+      - person
+      - mode
+      - resonance
+    sort:
+      - property: resonance
+        direction: DESC

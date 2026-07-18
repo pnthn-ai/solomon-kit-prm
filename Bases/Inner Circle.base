@@ -1,0 +1,23 @@
+# Solomon PRM kit — family and close friends only.
+# The OR lives in a native Obsidian `or:` filter group (nested in the
+# and-list), which BOTH engines evaluate correctly: real Obsidian evaluates
+# the group natively, and Solomon's importer (src/surfaces/bases/
+# obsidian-base.js) maps a flat `or:` group to one OR where-line of base
+# DSL — `where circle is "family" or circle is "close"` — and exports it
+# back to this exact `or:` form, so the file round-trips losslessly.
+# (An inline `circle == "family" || circle == "close"` expression string
+# also imports as the same OR group now, but the grouped form is what
+# Solomon's exporter emits, so keeping it means a zero-diff round trip.)
+filters:
+  and:
+    - type == "person"
+    - or:
+        - circle == "family"
+        - circle == "close"
+views:
+  - type: table
+    name: Inner Circle
+    order:
+      - circle
+      - last_contact
+      - cadence_days

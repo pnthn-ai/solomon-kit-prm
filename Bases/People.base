@@ -1,0 +1,19 @@
+# Solomon PRM kit — every person in the vault, oldest last-contact first.
+# Authored as Obsidian Bases YAML (the on-disk `.base` format Solomon's own
+# Bases surface writes/reads — src-tauri/src/commands.rs base_file_save/
+# base_file_read, src/surfaces/bases/obsidian-base.js) so this file also
+# opens correctly under Obsidian's own Bases plugin.
+filters:
+  and:
+    - type == "person"
+views:
+  - type: table
+    name: People
+    order:
+      - circle
+      - cadence_days
+      - last_contact
+      - overdue
+    sort:
+      - property: last_contact
+        direction: ASC

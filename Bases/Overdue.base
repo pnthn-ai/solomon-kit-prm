@@ -1,0 +1,21 @@
+# Solomon PRM kit — who am I overdue to contact? Real date predicate (the
+# `now`/relative-date base-DSL token — core/src/bases.rs — makes this
+# expressible: `type is person and last_contact lt now-30d`). The 30-day
+# window is a coarse net, not per-person cadence — cadence_days-aware
+# ranking is the `prm-checkin` agent's job (Agents/prm-checkin.md), which
+# also keeps the `overdue`/`last_contact` fields on each Person note current
+# as a belt-and-braces signal independent of this query.
+filters:
+  and:
+    - type == "person"
+    - last_contact < date(now()) - "30 days"
+views:
+  - type: table
+    name: Overdue
+    order:
+      - circle
+      - last_contact
+      - cadence_days
+    sort:
+      - property: last_contact
+        direction: ASC
