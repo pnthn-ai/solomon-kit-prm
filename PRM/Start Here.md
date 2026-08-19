@@ -4,9 +4,7 @@ type: dashboard
 
 # Start Here
 
-Welcome to your PRM. Three fictional people (Ada, Marcus, Priya) and six
-interactions are already logged so every base and the widget below render
-non-empty — read through them, then replace them with your own.
+Open this folder as a vault in Solomon (desktop, Apple Silicon, 0.2.4 or newer; 0.3.0 is current). The table below should be a live check-in queue, not a code fence. Three fictional people are already logged so it is not empty.
 
 ## Who's overdue
 
@@ -18,23 +16,23 @@ sort last_contact asc
 columns circle, last_contact, cadence_days
 ```
 
+If that is still a fence, stop. The rest of this kit will not make sense until the widget is live. Download the signed app: https://app.lomon.dev/api/desktop/update/download?tag=v0.3.0&asset=Solomon_0.3.0_aarch64.dmg
+
 ## Your first move
 
-1. Read `Skills/prm/SKILL.md` — it's the whole playbook, two minutes.
-2. Pick one real person. Insert `Templates/Person.md`, rename it to their
-   name, drop it in `People/`. Write one fact in `## They care about`.
-3. Log your last real interaction with them: insert `Templates/
-   Interaction.md` into `Interactions/`, fill the four fields
-   (`person`/`mode`/`initiated_by`/`resonance`), one line on what happened.
-4. Delete the seed content (`People/Ada Okafor.md`,
-   `People/Marcus Webb.md`, `People/Priya Sharma.md`, and their matching
-   `Interactions/*.md` files) once you've got a feel for the shape.
-5. When you're ready for the weekly ritual, open `PRM/Weekly Review.md`.
+1. Pick one real person. Insert `Templates/Person.md`, rename it to their name, drop it in `People/`. Write one fact in `## They care about`.
+2. Log your last real interaction with them: insert `Templates/Interaction.md` into `Interactions/`, fill `person` / `mode` / `initiated_by` / `resonance`, one line on what happened.
 
-## The five bases
+That is first-run. You are done when one real person and one real interaction exist.
+
+When you are ready, delete the seed people (`People/Ada Okafor.md`, `People/Marcus Webb.md`, `People/Priya Sharma.md`) and their matching `Interactions/*.md` files. The operating playbook is `Skills/prm/SKILL.md`. Weekly ritual is `PRM/Weekly Review.md`.
+
+## Bases (import-only)
+
+`.base` files in `Bases/` do **not** auto-appear in Solomon. They are the portable source of truth. To use one: Bases surface → **⇅ .base** → **Import** → pick the file. Importing replaces the active base's query, so add a new base first if you want to keep what is there. One file at a time.
 
 - `Bases/People.base` — everyone, oldest `last_contact` first.
-- `Bases/Overdue.base` — the same query the widget above runs, saved.
+- `Bases/Overdue.base` — the same query as the widget above.
 - `Bases/Inner Circle.base` — family + close only.
-- `Bases/Recent Interactions.base` — your last 20 touches.
-- `Bases/High Resonance.base` — the engagements that landed (resonance ≥ 4).
+- `Bases/Recent Interactions.base` — last 20 touches.
+- `Bases/High Resonance.base` — resonance ≥ 4.
