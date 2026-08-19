@@ -4,7 +4,7 @@ type: dashboard
 
 # Start Here
 
-Open this folder as a vault in Solomon (desktop, Apple Silicon, 0.2.4 or newer; 0.3.0 is current). The table below should be a live check-in queue, not a code fence. Three fictional people are already logged so it is not empty.
+Open this folder as a vault in Solomon (desktop, Mac Apple Silicon, 0.2.4 or newer; 0.3.0 is current). The table below should be a live check-in queue, not a code fence. Three fictional people are already logged so it is not empty.
 
 ## Who's overdue
 
@@ -16,7 +16,7 @@ sort last_contact asc
 columns circle, last_contact, cadence_days
 ```
 
-If that is still a fence, stop. The rest of this kit will not make sense until the widget is live. Download the signed app: https://app.lomon.dev/api/desktop/update/download?tag=v0.3.0&asset=Solomon_0.3.0_aarch64.dmg
+If the queue is a fenced code block, stop. That means Solomon is not running this vault. Install the signed app (Mac, Apple Silicon only): https://app.lomon.dev/api/desktop/update/download?tag=v0.3.0&asset=Solomon_0.3.0_aarch64.dmg then open this folder as a vault.
 
 ## Your first move
 
